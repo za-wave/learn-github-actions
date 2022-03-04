@@ -1,0 +1,61 @@
+name: terraform plan
+
+on: pull_request
+
+env:
+  tf_version: "1.1.7"
+  tf_work_dir: "."
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      statuses: write
+
+    steps:
+      - uses: actions/checkout@v2
+      - id: auth_stg
+        name: Authenticate to Google Cloud for stg
+        uses: google-github-actions/auth@v0.3.1
+        with:
+          create_credentials_file: "true"
+          workload_identity_provider: projects/478417104229/locations/global/workloadIdentityPools/github-actions/attribute.repository/za-wave/learn-github-actions
+          service_account: my-service-account@learn-git-action-terraform-gcp.iam.gserviceaccount.com
+          access_token_lifetime: 120s
+
+      - name: gcloud auth login by workload identity
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth_stg.outputs.credentials_file_path || steps.auth_prod.outputs.credentials_file_path }}"
+
+      - name: terraform fmt
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: fmt
+          tf_actions_working_dir: ${{ env.tf_work_dir }}
+
+      - name: terraform init
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: init
+          tf_actions_working_dir: ${{ env.tf_work_dir }}
+
+      - name: terraform validate
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: validate
+          tf_actions_working_dir: ${{ env.tf_work_dir }}
+
+      - name: terraform plan
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.tf_version }}
+          tf_actions_subcommand: plan
+          tf_actions_working_dir: ${{ env.tf_work_dir }}
