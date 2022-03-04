@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -34,11 +34,12 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-      
-      - uses: ./.github/workflows
-          
+
       - name: Setup Go environment
         uses: actions/setup-go@v3.0.0
         with:
           # Set this option to true if you want the action to always check for the latest available version that satisfies the version spec
           check-latest: true
+
+      - uses: workflows/checkout@v2
+      - uses: ./.github/workflows
