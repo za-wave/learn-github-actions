@@ -18,3 +18,12 @@ provider "google" {
 resource "google_compute_network" "vpc_network" {
   name = "terraform-network"
 }
+
+resource "google_project_iam_member" "sa_terraform" {
+   role    = "roles/owner"
+   member  = "serviceAccount:${google_service_account.terraform.email}"
+ }
+
+resource "google_service_account" "test" {
+  account_id    =    "test"
+}
