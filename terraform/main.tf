@@ -10,7 +10,7 @@ terraform {
 provider "google" {
   credentials = file(var.credentials_file)
 
-  project = learn-git-action-terraform-gcp"
+  project = "learn-git-action-terraform-gcp"
   region  = "us-central1"
   zone    = "us-central1-c"
 }
